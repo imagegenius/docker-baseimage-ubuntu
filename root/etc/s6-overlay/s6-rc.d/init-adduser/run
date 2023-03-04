@@ -5,29 +5,30 @@ usermod -o -u "${PUID:-911}" abc &>/dev/null
 groupmod -o -g "${PGID:-911}" abc &>/dev/null
 
 echo '
----------------------------------
-|      __  _____ _____       __
-|     / / |_   _/ ____|     / /
-|    / /    | || |  __     / /
-|   / /     | || | |_ |   / /
-|  / /     _| || |__| |  / /
-| /_/     |_____\_____| /_/
-|'
+╔═══════════════════════════════╗
+       __  _____ _____       __
+      / / |_   _/ ____|     / /
+     / /    | || |  __     / /
+    / /     | || | |_ |   / /
+   / /     _| || |__| |  / /
+  /_/     |_____\_____| /_/
+
+  Baseimage from linuxserver.io'
 
 if [[ -f /donate.txt ]]; then
-	echo "| To support this applications developer(s) visit:
-| $(cat /donate.txt)
-| "
+    echo "╠═══════════════════════════════╣
+  To support this applications developer(s) visit:
+  $(cat /donate.txt)"
 fi
-echo "| User/Group ID:
-| User UID: $(id -u abc)
-| User GID: $(id -g abc)
-| 
-| This image uses linuxserver/baseimage-ubuntu as a baseimage
----------------------------------"
 
+echo "╠═══════════════════════════════╣
+  User/Group ID:
+  User UID: $(id -u abc)
+  User GID: $(id -g abc)"
+
+echo '╚═══════════════════════════════╝'
 
 chown abc:abc \
-	/app \
-	/config \
-	/defaults
+    /app \
+    /config \
+    /defaults
