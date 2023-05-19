@@ -1,0 +1,12 @@
+deb http://ports.ubuntu.com/ubuntu-ports/ lunar main restricted multiverse
+deb-src http://ports.ubuntu.com/ubuntu-ports/ lunar main restricted multiverse
+deb http://ports.ubuntu.com/ubuntu-ports/ lunar-updates main restricted multiverse
+deb-src http://ports.ubuntu.com/ubuntu-ports/ lunar-updates main restricted multiverse
+deb http://ports.ubuntu.com/ubuntu-ports/ lunar universe
+deb-src http://ports.ubuntu.com/ubuntu-ports/ lunar universe
+deb http://ports.ubuntu.com/ubuntu-ports/ lunar-updates universe
+deb-src http://ports.ubuntu.com/ubuntu-ports/ lunar-updates universe
+deb http://ports.ubuntu.com/ubuntu-ports/ lunar-security main restricted multiverse
+deb-src http://ports.ubuntu.com/ubuntu-ports/ lunar-security main restricted multiverse
+deb http://ports.ubuntu.com/ubuntu-ports/ lunar-security universe
+deb-src http://ports.ubuntu.com/ubuntu-ports/ lunar-security universe
