@@ -115,7 +115,7 @@ RUN \
     curl \
     gnupg \
     jq \
-    netcat \
+    netcat-traditional \
     tzdata && \
   echo "**** generate locale ****" && \
   locale-gen en_US.UTF-8 && \
