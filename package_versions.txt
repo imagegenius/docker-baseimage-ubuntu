@@ -100,7 +100,7 @@ libsepol2            3.4-2                              deb
 libsmartcols1        2.38.1-4ubuntu1                    deb   
 libsqlite3-0         3.40.1-1                           deb   
 libss2               1.47.0-1ubuntu1                    deb   
-libssh-4             0.10.4-2                           deb   
+libssh-4             0.10.4-2ubuntu0.1                  deb   
 libssl3              3.0.8-1ubuntu1.2                   deb   
 libstdc++6           13-20230320-1ubuntu1               deb   
 libsystemd0          252.5-2ubuntu3                     deb   
@@ -130,8 +130,8 @@ sed                  4.9-1                              deb
 sensible-utils       0.0.17+nmu1                        deb   
 sysvinit-utils       3.06-2ubuntu1                      deb   
 tar                  1.34+dfsg-1.2                      deb   
-tzdata               2023c-2exp1ubuntu1                 deb   
-tzdata-icu           2023c-2exp1ubuntu1                 deb   
+tzdata               2023c-2exp1ubuntu1.1               deb   
+tzdata-icu           2023c-2exp1ubuntu1.1               deb   
 ubuntu-keyring       2021.03.26                         deb   
 usrmerge             33ubuntu1                          deb   
 util-linux           2.38.1-4ubuntu1                    deb   
