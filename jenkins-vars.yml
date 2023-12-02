@@ -4,8 +4,8 @@
 project_name: docker-baseimage-ubuntu
 external_type: os
 release_type: prerelease
-release_tag: lunar
-ig_branch: lunar
+release_tag: mantic
+ig_branch: mantic
 repo_vars:
   - BUILD_VERSION_ARG = 'OS'
   - IG_USER = 'imagegenius'

@@ -5,7 +5,7 @@
 FROM alpine:3.17 as rootfs-stage
 
 # environment
-ENV REL=lunar
+ENV REL=mantic
 ENV ARCH=amd64
 
 # install packages
