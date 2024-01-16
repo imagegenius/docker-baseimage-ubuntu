@@ -131,8 +131,8 @@ sed                  4.9-1                              deb
 sensible-utils       0.0.17+nmu1                        deb     
 sysvinit-utils       3.06-4ubuntu1                      deb     
 tar                  1.34+dfsg-1.2ubuntu1               deb     
-tzdata               2023c-9ubuntu1                     deb     
-tzdata-icu           2023c-9ubuntu1                     deb     
+tzdata               2023d-0ubuntu0.23.10               deb     
+tzdata-icu           2023d-0ubuntu0.23.10               deb     
 ubuntu-keyring       2021.03.26                         deb     
 usrmerge             35ubuntu1                          deb     
 util-linux           2.38.1-5ubuntu2                    deb     
