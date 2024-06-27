@@ -4,8 +4,8 @@
 project_name: docker-baseimage-ubuntu
 external_type: os
 release_type: stable
-release_tag: "jammy"
-ig_branch: "jammy"
+release_tag: "noble"
+ig_branch: "noble"
 repo_vars:
   - BUILD_VERSION_ARG = 'OS'
   - IG_USER = 'imagegenius'
