@@ -37,8 +37,7 @@ pipeline {
               if [[ -n "${containers}" ]]; then
                 docker stop ${containers}
               fi
-              docker system prune -af --volumes || :
-           '''
+              docker system prune -af --volumes || : '''
         script{
           env.EXIT_STATUS = ''
           env.IG_RELEASE = sh(
@@ -90,7 +89,7 @@ pipeline {
       steps{
         script{
           env.PACKAGE_TAG = sh(
-            script: '''#! /bin/bash
+            script: '''#!/bin/bash
                        if [ -e package_versions.txt ] ; then
                          cat package_versions.txt | md5sum | cut -c1-8
                        else
@@ -195,12 +194,12 @@ pipeline {
         script{
           env.GITHUBIMAGE = 'ghcr.io/' + env.IG_USER + '/igpipepr-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm64v8-mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
+            env.CI_TAGS = 'amd64-mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST + '|arm64v8-mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           } else {
-            env.CI_TAGS = 'mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
+            env.CI_TAGS = 'mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           }
-          env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
-          env.META_TAG = 'mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
+          env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
+          env.META_TAG = 'mantic-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           env.EXT_RELEASE_TAG = 'mantic-version-' + env.EXT_RELEASE_CLEAN
           env.CODE_URL = 'https://github.com/' + env.IG_USER + '/' + env.IG_REPO + '/pull/' + env.PULL_REQUEST
         }
@@ -256,7 +255,7 @@ pipeline {
               # ${TEMPDIR}/unraid/docker-templates: Cloned docker-templates repo to check for logos
               # ${TEMPDIR}/unraid/templates: Cloned templates repo for commiting unraid template changes and pushing back to Github
               git clone --branch mantic --depth 1 https://ImageGeniusCI:${GITHUB_TOKEN}@github.com/${IG_USER}/${IG_REPO}.git ${TEMPDIR}/docker-${CONTAINER_NAME}
-              docker run --rm -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/tmp -e LOCAL=true ghcr.io/imagegenius/jenkins-builder:latest 
+              docker run --rm -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/tmp -e LOCAL=true -e PUID=$(id -u) -e PGID=$(id -g) ghcr.io/imagegenius/jenkins-builder:latest 
               echo "Starting Stage 1 - Jenkinsfile update"
               if [[ "$(md5sum Jenkinsfile | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/Jenkinsfile | awk '{ print $1 }')" ]]; then
                 mkdir -p ${TEMPDIR}/repo
@@ -276,7 +275,7 @@ pipeline {
                 echo "Jenkinsfile is up to date."
               fi
               echo "Starting Stage 2 - Delete old templates"
-              OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md .github/ISSUE_TEMPLATE/issue.bug.md .github/ISSUE_TEMPLATE/issue.feature.md .github/workflows/call_invalid_helper.yml .github/workflows/stale.yml Dockerfile.armhf"
+              OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md .github/ISSUE_TEMPLATE/issue.bug.md .github/ISSUE_TEMPLATE/issue.feature.md .github/workflows/call_invalid_helper.yml .github/workflows/stale.yml"
               for i in ${OLD_TEMPLATES}; do
                 if [[ -f "${i}" ]]; then
                   TEMPLATES_TO_DELETE="${i} ${TEMPLATES_TO_DELETE}"
@@ -402,6 +401,7 @@ pipeline {
           --label \"org.opencontainers.image.title=Baseimage-ubuntu\" \
           --label \"org.opencontainers.image.description=baseimage-ubuntu image by imagegenius.io\" \
           --no-cache --pull -t ${GITHUBIMAGE}:${META_TAG} --platform=linux/amd64 \
+          --provenance=false --sbom=false \
           --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
       }
     }
@@ -431,6 +431,7 @@ pipeline {
               --label \"org.opencontainers.image.title=Baseimage-ubuntu\" \
               --label \"org.opencontainers.image.description=baseimage-ubuntu image by imagegenius.io\" \
               --no-cache --pull -t ${GITHUBIMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
+              --provenance=false --sbom=false \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
           }
         }
@@ -457,6 +458,7 @@ pipeline {
               --label \"org.opencontainers.image.title=Baseimage-ubuntu\" \
               --label \"org.opencontainers.image.description=baseimage-ubuntu image by imagegenius.io\" \
               --no-cache --pull -f Dockerfile.aarch64 -t ${GITHUBIMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
+              --provenance=false --sbom=false \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
             sh "docker tag ${GITHUBIMAGE}:arm64v8-${META_TAG} ghcr.io/imagegenius/igdev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
@@ -483,7 +485,7 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
+              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" != "true" ]; then
                 LOCAL_CONTAINER=${GITHUBIMAGE}:amd64-${META_TAG}
               else
                 LOCAL_CONTAINER=${GITHUBIMAGE}:${META_TAG}
@@ -581,7 +583,6 @@ pipeline {
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -e IMAGE=\"${GITHUBIMAGE}\" \
                 -e CONTAINER=\"${CONTAINER_NAME}\" \
-                -e DELAY_START=\"${CI_DELAY:-30}\" \
                 -e TAGS=\"${CI_TAGS}\" \
                 -e META_TAG=\"${META_TAG}\" \
                 -e PORT=\"${CI_PORT}\" \
@@ -644,10 +645,8 @@ pipeline {
                   docker pull ghcr.io/imagegenius/igdev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                   docker tag ghcr.io/imagegenius/igdev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${GITHUBIMAGE}:arm64v8-${META_TAG}
                 fi
-                docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:amd64-${META_TAG}
                 docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:amd64-mantic
                 docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:amd64-${EXT_RELEASE_TAG}
-                docker tag ${GITHUBIMAGE}:arm64v8-${META_TAG} ${GITHUBIMAGE}:arm64v8-${META_TAG}
                 docker tag ${GITHUBIMAGE}:arm64v8-${META_TAG} ${GITHUBIMAGE}:arm64v8-mantic
                 docker tag ${GITHUBIMAGE}:arm64v8-${META_TAG} ${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                 if [ -n "${SEMVER}" ]; then
@@ -664,35 +663,11 @@ pipeline {
                   docker push ${GITHUBIMAGE}:amd64-${SEMVER}
                   docker push ${GITHUBIMAGE}:arm64v8-${SEMVER}
                 fi
-                docker manifest push --purge ${GITHUBIMAGE}:mantic || :
-                docker manifest create ${GITHUBIMAGE}:mantic ${GITHUBIMAGE}:amd64-mantic ${GITHUBIMAGE}:arm64v8-mantic
-                docker manifest annotate ${GITHUBIMAGE}:mantic ${GITHUBIMAGE}:arm64v8-mantic --os linux --arch arm64 --variant v8
-                docker manifest push --purge ${GITHUBIMAGE}:${META_TAG} || :
-                docker manifest create ${GITHUBIMAGE}:${META_TAG} ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:arm64v8-${META_TAG}
-                docker manifest annotate ${GITHUBIMAGE}:${META_TAG} ${GITHUBIMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8
-                docker manifest push --purge ${GITHUBIMAGE}:${EXT_RELEASE_TAG} || :
-                docker manifest create ${GITHUBIMAGE}:${EXT_RELEASE_TAG} ${GITHUBIMAGE}:amd64-${EXT_RELEASE_TAG} ${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG}
-                docker manifest annotate ${GITHUBIMAGE}:${EXT_RELEASE_TAG} ${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG} --os linux --arch arm64 --variant v8
+                docker buildx imagetools create -t ${GITHUBIMAGE}:mantic ${GITHUBIMAGE}:amd64-mantic ${GITHUBIMAGE}:arm64v8-mantic
+                docker buildx imagetools create -t ${GITHUBIMAGE}:${META_TAG} ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:arm64v8-${META_TAG}
+                docker buildx imagetools create -t ${GITHUBIMAGE}:${EXT_RELEASE_TAG} ${GITHUBIMAGE}:amd64-${EXT_RELEASE_TAG} ${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                 if [ -n "${SEMVER}" ]; then
-                  docker manifest push --purge ${GITHUBIMAGE}:${SEMVER} || :
-                  docker manifest create ${GITHUBIMAGE}:${SEMVER} ${GITHUBIMAGE}:amd64-${SEMVER} ${GITHUBIMAGE}:arm64v8-${SEMVER}
-                  docker manifest annotate ${GITHUBIMAGE}:${SEMVER} ${GITHUBIMAGE}:arm64v8-${SEMVER} --os linux --arch arm64 --variant v8
-                fi
-                token=$(curl -sX GET "https://ghcr.io/token?scope=repository%3Aimagegenius%2F${CONTAINER_NAME}%3Apull" | jq -r '.token')
-                digest=$(curl -s \
-                  --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                  --header "Authorization: Bearer ${token}" \
-                  "https://ghcr.io/v2/imagegenius/${CONTAINER_NAME}/manifests/arm32v7-mantic")
-                if [[ $(echo "$digest" | jq -r '.layers') != "null" ]]; then
-                  docker manifest push --purge ${GITHUBIMAGE}:arm32v7-mantic || :
-                  docker manifest create ${GITHUBIMAGE}:arm32v7-mantic ${GITHUBIMAGE}:amd64-mantic
-                  docker manifest push --purge ${GITHUBIMAGE}:arm32v7-mantic
-                fi
-                docker manifest push --purge ${GITHUBIMAGE}:mantic
-                docker manifest push --purge ${GITHUBIMAGE}:${META_TAG} 
-                docker manifest push --purge ${GITHUBIMAGE}:${EXT_RELEASE_TAG} 
-                if [ -n "${SEMVER}" ]; then
-                  docker manifest push --purge ${GITHUBIMAGE}:${SEMVER} 
+                  docker buildx imagetools create -t ${GITHUBIMAGE}:${SEMVER} ${GITHUBIMAGE}:amd64-${SEMVER} ${GITHUBIMAGE}:arm64v8-${SEMVER}
                 fi
              '''
           }
